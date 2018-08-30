@@ -1,0 +1,4 @@
+params.js
+node_modules
+*.json
+*.txt

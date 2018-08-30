@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="utf-8" />  
+  <title>Démonstrateur api.mi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="./css/demo.css" />
+  <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.2.0/css/all.css" integrity="sha384-hWVjflwFxL6sNzntih27bfxkr27PmbbK/iSvJ+a4+0owXq79v+lsFkW54bOGbiDQ" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css" integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ==" crossorigin="" />
+  <link rel="stylesheet" href="./dist/leaflet.awesome-markers.css" />
+  <script src="http://ajax.aspnetcdn.com/ajax/jquery/jquery-1.9.0.js"></script>
+  <script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+  <!-- <script src="http://www.openlayers.org/api/OpenLayers.js"></script> -->
+  <script src="https://unpkg.com/leaflet@1.3.1/dist/leaflet.js" integrity="sha512-/Nsx9X4HebavoBvEBuyp3I7od5tA0UzAxs+j83KgC8PU0kgB4XiK4Lfe4y4cgBtaRJQEIFCW+oC506aPT2L1zw==" crossorigin=""></script>
+  <script src="./dist/leaflet.awesome-markers.js"></script>
+</head>
+
+<body>
+  <div class="navbar-brand">
+    <h1><a class="navbar-nav" href="#">
+      <img src="./img/minisint.png" style="height:90px;" />Démonstrateur api.mi</a></h1>
+  </div>
+  <div id="main" class="container">
+    Numéro SIRET <input onchange="getInfo();" type="text" id="siret" name="siret" />
+    <button id="rechercher" name="rechercher" onclick="getInfo();">Rechercher</button>
+    <div id="info_entreprise" name="info_entreprise">
+      <p>
+        <b>Raison sociale :</b> <span id="raison_sociale" name="raison_sociale"></span>
+      </p>
+      <p>
+        <b>Tranche d'effectif</b> : <span id="tranche_effectif" name="tranche_effectif"></span>
+      </p>
+      <p>
+        <b>Adresse</b> : <span id="adresse_etablissement" name="adresse_etablissement"></span>
+      </p>
+    </div>
+    <div id="info_administration">
+      <p>
+        <b>Département : <span id="departement" name="departement"></span></b>
+      </p>
+      <div id="map">
+
+      </div>
+      <table>
+        <th>
+          Administration
+        </th>
+        <th>
+          Adresse
+        </th>
+        <th>
+          Téléphone
+        </th>
+        <th>
+          email
+        </th>
+        <th>
+          Horraires
+        </th>
+        <tr>
+          <td id="prefecture" name="prefecture"></td>
+          <td id="adresse_pref" name="adresse_pref"></td>
+          <td id="tel_pref" name="tel_pref"></td>
+          <td id="mail_pref" name="mail_pref"></td>
+          <td id="horraires_pref" name="horraires_pref"></td>
+        </tr>
+        <tr>
+          <td id="sous_pref" name="sous_pref"></td>
+          <td id="adresse_sous_pref" name="adresse_sous_pref"></td>
+          <td id="tel_sous_pref" name="tel_sous_pref"></td>
+          <td id="mail_sous_pref" name="mail_sous_pref"></td>
+          <td id="horraires_sous_pref" name="horraires_sous_pref"></td>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var lon = 0;
+    var lat = 0;
+    var macarte = null;
+    var markers = [];
+
+    function initMap() {
+      macarte = L.map('map').setView([lat, lon], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+        attribution: 'données © <a href="//osm.org/copyright">OpenStreetMap</a>/ODbL - rendu <a href="//openstreetmap.fr">OSM France</a>',
+        minZoom: 1,
+        maxZoom: 20
+      }).addTo(macarte);
+    }
+    window.onload = function() {
+      initMap();
+    }
+
+    function getInfo() {
+      var depCode = getEtablissement();
+    }
+
+    function getEtablissement() {
+      var etablissementURI = 'http://localhost:8085/etablissements/';
+      var siret = $("#siret").val();
+      var format = "json";
+      var req = etablissementURI + siret;
+      var xhttp = new XMLHttpRequest();
+      var result;
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          result = JSON.parse(this.responseText);
+          var raison_sociale = result.etablissement.adresse.l1;
+          $("#raison_sociale").html(raison_sociale);
+          $("#tranche_effectif").html(result.etablissement.tranche_effectif_salarie_etablissement.intitule);
+          var adresse = result.etablissement.adresse.numero_voie + " " + result.etablissement.adresse.type_voie + " " + result.etablissement.adresse.nom_voie + " " + result.etablissement.adresse.code_postal + " " + result.etablissement.adresse.localite;
+          $("#adresse_etablissement").html(adresse);
+          var codepostal = result.etablissement.adresse.code_postal;
+          var naf = result.etablissement.naf;
+          getLonLatEtablissement(raison_sociale, adresse, codepostal, naf);
+        }
+      };
+      xhttp.open("GET", req, true);
+      xhttp.send();
+    }
+
+    function getLonLatEtablissement(raison_sociale, adresse, codepostal, naf) {
+      var lonlatURI = 'http://localhost:8085/adresses/';
+      var req = lonlatURI + "?adresse=" + adresse;
+      var xhttp = new XMLHttpRequest();
+      var result;
+      var icon = "";
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          result = JSON.parse(this.responseText);
+          lon_etablissement = result.features[0].geometry.coordinates[0];
+          lat_etablissement = result.features[0].geometry.coordinates[1];
+          // var marker_etablissement = L.marker([lat_etablissement, lon_etablissement]).addTo(macarte);
+          if (naf == '4520A') {
+            icon = "wrench";
+          }
+          var marker_etablissement = L.marker([lat_etablissement, lon_etablissement], {
+            icon: L.AwesomeMarkers.icon({
+              icon: icon,
+              color: 'red',
+              spin: false
+            })
+          }).addTo(macarte);
+          marker_etablissement.bindPopup(raison_sociale);
+          markers.push(marker_etablissement);
+          macarte.setView([lat_etablissement, lon_etablissement], 11);
+          getDepartement(codepostal);
+        }
+      };
+      xhttp.open("GET", req, true);
+      xhttp.send();
+    }
+
+    function getDepartement(codepostal) {
+      var regionURI = 'https://geo.api.gouv.fr/communes';
+      var codepostal = codepostal;
+      var format = "json";
+      var req = regionURI + "?codePostal=" + codepostal + "&fields=centre,departement&format=" + format + "&geometry=centre";
+      var xhttp = new XMLHttpRequest();
+      var result;
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          result = JSON.parse(this.responseText);
+          $("#departement").html(result[0].departement.nom);
+          getPref(result[0].departement.code);
+        }
+      };
+      xhttp.open("GET", req, true);
+      xhttp.send();
+    }
+
+    function getPref(dep) {
+      var prefURI = 'https://etablissements-publics.api.gouv.fr/v1/organismes/' + dep + '/prefecture';
+      var xhttp = new XMLHttpRequest();
+      var result;
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          result = JSON.parse(this.responseText);
+          var adresse = result.features[0].properties.Adresse.Ligne + " " + result.features[0].properties.Adresse.CodePostal + " " + result.features[0].properties.Adresse.NomCommune;
+          $("#prefecture").html(result.features[0].properties.Nom);
+          $("#adresse_pref").html(adresse);
+          $("#tel_pref").html(result.features[0].properties.CoordonnéesNum.Téléphone);
+          $("#mail_pref").html(result.features[0].properties.CoordonnéesNum.Email);
+          $("#horraires_pref").html("Ouvert du " + result.features[0].properties.Ouverture.PlageJ.début + " au " + result.features[0].properties.Ouverture.PlageJ.fin + " de " + result.features[0].properties.Ouverture.PlageJ.PlageH.début + " à " +
+            result.features[
+              0].properties.Ouverture.PlageJ.PlageH.fin);
+          lon_pref = result.features[0].geometry.coordinates[0];
+          lat_pref = result.features[0].geometry.coordinates[1];
+          var marker_pref = L.marker([lat_pref, lon_pref]).addTo(macarte);
+          marker_pref.bindPopup(result.features[0].properties.Nom);
+          markers.push(marker_pref);
+          getSsPref(dep);
+        }
+      };
+      xhttp.open("GET", prefURI, true);
+      xhttp.send();
+    }
+
+
+    function getSsPref(dep) {
+      var ssPrefURI = 'https://etablissements-publics.api.gouv.fr/v1/organismes/' + dep + '/sous_pref';
+      var xhttp = new XMLHttpRequest();
+      var result;
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          result = JSON.parse(this.responseText);
+          var adresse = result.features[0].properties.Adresse.Ligne + " " + result.features[0].properties.Adresse.CodePostal + " " + result.features[0].properties.Adresse.NomCommune;
+          $("#sous_pref").html(result.features[0].properties.Nom);
+          $("#adresse_sous_pref").html(adresse);
+          $("#tel_sous_pref").html(result.features[0].properties.CoordonnéesNum.Téléphone);
+          $("#mail_sous_pref").html(result.features[0].properties.CoordonnéesNum.Email);
+          $("#horraires_sous_pref").html("Ouvert du " + result.features[0].properties.Ouverture.PlageJ.début + " au " + result.features[0].properties.Ouverture.PlageJ.fin + " de " + result.features[0].properties.Ouverture.PlageJ.PlageH.début +
+            " à " +
+            result.features[0].properties.Ouverture.PlageJ.PlageH.fin);
+          lon_sous_pref = result.features[0].geometry.coordinates[0];
+          lat_sous_pref = result.features[0].geometry.coordinates[1];
+          var marker_sous_pref = L.marker([lat_sous_pref, lon_sous_pref]).addTo(macarte);
+          marker_sous_pref.bindPopup(result.features[0].properties.Nom);
+          markers.push(marker_sous_pref);
+          var group = new L.featureGroup(markers);
+          macarte.fitBounds(group.getBounds().pad(0.5));
+        }
+      };
+      xhttp.open("GET", ssPrefURI, true);
+      xhttp.send();
+    }
+  </script>
+</body>
+
+</html>
