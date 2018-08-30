@@ -2,7 +2,7 @@
 <html lang="fr">
 
 <head>
-  <meta charset="utf-8" />  
+  <meta charset="utf-8" />
   <title>Démonstrateur api.mi</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="./css/demo.css" />
@@ -110,7 +110,7 @@
           result = JSON.parse(this.responseText);
           var raison_sociale = result.etablissement.adresse.l1;
           $("#raison_sociale").html(raison_sociale);
-          $("#tranche_effectif").html(result.etablissement.tranche_effectif_salarie_etablissement.intitule);
+          $("#tranche_effectif").html(result.etablissement.tranche_effectif_salarie_etablissement.intitule+" ("+result.etablissement.tranche_effectif_salarie_etablissement.date_reference+")");
           var adresse = result.etablissement.adresse.numero_voie + " " + result.etablissement.adresse.type_voie + " " + result.etablissement.adresse.nom_voie + " " + result.etablissement.adresse.code_postal + " " + result.etablissement.adresse.localite;
           $("#adresse_etablissement").html(adresse);
           var codepostal = result.etablissement.adresse.code_postal;

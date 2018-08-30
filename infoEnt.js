@@ -34,16 +34,14 @@ app.get('/entreprises/:siren', function(req, res) {
   var recipient = encodeURIComponent(params.apientreprise_recipient);
   var object = encodeURIComponent("demonstrateur");
   var siren = encodeURIComponent(req.params.siren);
-  // var siren = encodeURIComponent("542086616");
 
   var url = base + "/" + siren + "?token=" + token + "&context=" + context + "&recipient=" + recipient + "&object=" + object;
 
   request(url, function(error, response, body) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).send(body);
-    console.log(body);
+    // console.log(body);
   });
-  console.log("service rendu : " + siren);
 });
 
 // API Entreprise
@@ -54,16 +52,14 @@ app.get('/etablissements/:siret', function(req, res) {
   var recipient = encodeURIComponent(params.apientreprise_recipient);
   var object = encodeURIComponent("demonstrateur");
   var siret = encodeURIComponent(req.params.siret);
-  // var siret = encodeURIComponent("54208661600035");
 
   var url = base + "/" + siret + "?token=" + token + "&context=" + context + "&recipient=" + recipient + "&object=" + object;
 
   request(url, function(error, response, body) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).send(body);
-    console.log(body);
+    // console.log(body);
   });
-  console.log("service rendu : " + siret);
 });
 
 // Base Adresse Nationale
@@ -76,9 +72,8 @@ app.get('/adresses', function(req, res) {
   request(url, function(error, response, body) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).send(body);
-    console.log(body);
+    // console.log(body);
   });
-  console.log("service rendu : " + adresse);
 });
 
 // Géo API
@@ -91,9 +86,8 @@ app.get('/communes/:code', function(req, res) {
   request(url, function(error, response, body) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).send(body);
-    console.log(body);
+    // console.log(body);
   });
-  console.log("service rendu : ");
 });
 
 // Zones Urbaines Sensibles (ZUS), des Zones de Redynamisation Urbaines (ZRU) et des Zones Franches Urbaines (ZFU).
@@ -106,7 +100,6 @@ app.get('/zones', function(req, res) {
   request(url, function(error, response, body) {
     res.setHeader('Content-Type', 'application/json');
     res.status(200).send(body);
-    console.log(body);
+    // console.log(body);
   });
-  console.log("service rendu : ");
 });
