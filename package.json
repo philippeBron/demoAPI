@@ -1,0 +1,27 @@
+{
+  "name": "demoAP",
+  "version": "0.2.0",
+  "description": "Un démonstrateur d'appels d'API",
+  "main": "infoEnt.js",
+  "scripts": {
+    "start": "node infoEnt.js"
+  },
+  "dependencies": {
+    "express": "^4.15.3",
+    "bodyParser": "^1.17.2",
+    "request": "^2.81.0"
+  },
+  "engines": {
+    "node": "8.10.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://https://github.com/philippeBron/demoAPI.git"
+  },
+  "keywords": [
+    "api",
+    "enterprise"
+  ],
+  "author": "Philippe Bron",
+  "license": "MIT"
+}
